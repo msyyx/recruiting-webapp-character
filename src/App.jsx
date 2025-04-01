@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import './App.css';
-import { ATTRIBUTE_LIST, CLASS_LIST, SKILL_LIST } from './consts.js';
+import { CLASS_LIST, SKILL_LIST } from './consts.js';
 import { Class } from './class';
 import { Skill } from './skill';
 
@@ -17,6 +17,9 @@ function App() {
   }, [])
 
   const modifyAttribute = (attribute, val) => {
+    const attributeSum = Object.values(attributes).reduce((sum, attribute) => sum + attribute.value, 0);
+    if (attributeSum + val > 70) return
+
     const updatedAttributes = {
       ...attributes,
     };
