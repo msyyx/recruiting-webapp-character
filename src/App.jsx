@@ -7,21 +7,27 @@ function App() {
   const [attributes, setAttributes] = useState({
     Strength: {
       value: 9,
+      modifier: -1,
     },
     Dexterity: {
       value: 9,
+      modifier: -1,
     },
     Constitution: {
       value: 9,
+      modifier: -1,
     },
     Intelligence: {
       value: 9,
+      modifier: -1,
     },
     Wisdom: {
       value: 9,
+      modifier: -1,
     },
     Charisma: {
       value: 9,
+      modifier: -1,
     },
   });
 
@@ -32,6 +38,9 @@ function App() {
     updatedAttributes[attribute].value = Math.max(
       attributes[attribute].value + val,
       0
+    );
+    updatedAttributes[attribute].modifier = Math.floor(
+      (updatedAttributes[attribute].value - 10) / 2
     );
     setAttributes(updatedAttributes);
   };
@@ -46,7 +55,8 @@ function App() {
           <h3>Attributes</h3>
           {Object.entries(attributes).map(attribute => (
             <div key={attribute[0]}>
-              {attribute[0]}:{attribute[1].value}
+              {attribute[0]}:{attribute[1].value} (modifier:{' '}
+              {attribute[1].modifier})
               <button onClick={() => modifyAttribute(attribute[0], 1)}>
                 +
               </button>
