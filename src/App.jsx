@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import './App.css';
 import { ATTRIBUTE_LIST, CLASS_LIST, SKILL_LIST } from './consts.js';
-
+import { Class } from './class';
 
 function App() {
   const [attributes, setAttributes] = useState({
@@ -23,22 +23,25 @@ function App() {
     Charisma: {
       value: 9,
     },
-  })
+  });
 
   const modifyAttribute = (attribute, val) => {
     const updatedAttributes = {
       ...attributes,
-    }
-    updatedAttributes[attribute].value = Math.max(attributes[attribute].value + val, 0)
-    setAttributes(updatedAttributes)
-  }
+    };
+    updatedAttributes[attribute].value = Math.max(
+      attributes[attribute].value + val,
+      0
+    );
+    setAttributes(updatedAttributes);
+  };
 
   return (
-    <div className="App">
-      <header className="App-header">
+    <div className='App'>
+      <header className='App-header'>
         <h1>React Coding Exercise</h1>
       </header>
-      <section className="App-section">
+      <section className='App-section'>
         <div>
           <h3>Attributes</h3>
           {Object.entries(attributes).map(attribute => (
@@ -53,9 +56,20 @@ function App() {
             </div>
           ))}
         </div>
+        <div>
+          <h3>Classes</h3>
+          {Object.entries(CLASS_LIST).map(charClass => (
+            <Class
+              key={charClass[0]}
+              className={charClass[0]}
+              classRequirements={charClass[1]}
+              charAttributes={attributes}
+            />
+          ))}
+        </div>
       </section>
     </div>
-  )
+  );
 }
 
 export default App;
