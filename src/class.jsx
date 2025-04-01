@@ -1,4 +1,3 @@
-import React from 'react';
 import './App.css';
 import { useState } from 'react';
 
@@ -12,7 +11,7 @@ export function Class({ className, classRequirements, charAttributes }) {
   const classRequirementsMet = () => {
     let requirementsMet = true;
     Object.entries(classRequirements).forEach(requirement => {
-      if (requirement[1] > charAttributes[requirement[0]].value)
+      if (requirement[1] > charAttributes[requirement[0]]?.value)
         requirementsMet = false;
     });
     return requirementsMet;

@@ -1,6 +1,4 @@
-import React from 'react';
 import './App.css';
-import { useState } from 'react';
 
 export function Skill({ skill, charParams, modifySkillPoints }) {
   return (
