@@ -1,7 +1,7 @@
 import './App.css';
 import { useState } from 'react';
 
-export function Class({ className, classRequirements, charAttributes }) {
+function Class({ className, classRequirements, charAttributes }) {
   const [displayRequirements, setDisplayRequirements] = useState(false);
 
   const toggleDisplayRequirements = () => {
@@ -40,3 +40,5 @@ export function Class({ className, classRequirements, charAttributes }) {
     </div>
   );
 }
+
+export default Class

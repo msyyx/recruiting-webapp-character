@@ -1,24 +1,25 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import './App.css';
-import { CLASS_LIST, SKILL_LIST } from './consts.js';
-import { Class } from './class';
-import { Skill } from './skill';
+import Character from './character';
 
 function App() {
-  axios.defaults.baseURL = 'https://recruiting.verylongdomaintotestwith.ca'
-  const [attributes, setAttributes] = useState({});
-  const [charSkills, setSkills] = useState({});
-  const [availableSkillPoints, setAvailableSkillPoints] = useState(0)
-  const [loading, setLoading] = useState(true)
-  
-  useEffect(() => {
-    getCharacterSheet()
-  }, [])
+  axios.defaults.baseURL = 'https://recruiting.verylongdomaintotestwith.ca';
+  const [characters, setCharacters] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [charModifications, setCharModifications] = useState(0)
 
-  const modifyAttribute = (attribute, val) => {
-    const attributeSum = Object.values(attributes).reduce((sum, attribute) => sum + attribute.value, 0);
-    if (attributeSum + val > 70) return
+  useEffect(() => {
+    getCharacterSheets();
+  }, []);
+
+  const modifyCharacterAttribute = (char, attribute, val) => {
+    const attributes = characters[char].attributes
+    const attributeSum = Object.values(attributes).reduce(
+      (sum, attribute) => sum + attribute.value,
+      0
+    );
+    if (attributeSum + val > 70) return;
 
     const updatedAttributes = {
       ...attributes,
@@ -30,11 +31,17 @@ function App() {
     updatedAttributes[attribute].modifier = Math.floor(
       (updatedAttributes[attribute].value - 10) / 2
     );
-    setAttributes(updatedAttributes);
+    const updatedCharacters = characters
+    updatedCharacters[char].attributes = updatedAttributes
+    setCharacters(updatedCharacters)
+    setCharModifications(charModifications + 1)
   };
 
-  const modifySkillPoints = (skill, val) => {
-    if (availableSkillPoints - val < 0) return
+  const modifyCharacterSkillPoints = (char, skill, val) => {
+    const availableSkillPoints = characters[char].availableSkillPoints
+    const charSkills = characters[char].skills
+    const attributes = characters[char].attributes
+    if (availableSkillPoints - val < 0) return;
 
     const updatedSkills = {
       ...charSkills,
@@ -46,89 +53,88 @@ function App() {
       };
     updatedSkills[skill.name].points = updatedSkills[skill.name].points + val;
     updatedSkills[skill.name].total = updatedSkills[skill.name].total + val;
-    setAvailableSkillPoints(availableSkillPoints - val);
-    setSkills(updatedSkills);
+    const updatedCharacters = characters
+    updatedCharacters[char].availableSkillPoints = availableSkillPoints - val
+    updatedCharacters[char].skills = updatedSkills
+    setCharacters(updatedCharacters)
+    setCharModifications(charModifications + 1)
   };
 
-  const postCharacterSheet = async () => {
+  const postCharacterSheets = async () => {
     const url = '/api/msyyx/character';
-    const postResponse = await axios.post(url, {
-      attributes,
-      skills: charSkills,
-      availableSkillPoints,
-    })
+    const postResponse = await axios.post(url, characters);
     if (postResponse.status === 200) {
-      setLoading(true)
-      getCharacterSheet()
+      setLoading(true);
+      getCharacterSheets();
     }
-  }
+  };
 
-  const getCharacterSheet = async () => {
+  const getCharacterSheets = async () => {
     const url = '/api/msyyx/character';
-    const getResponse = await axios.get(url)
+    const getResponse = await axios.get(url);
     if (getResponse.status === 200) {
-      const data = getResponse.data.body
-      setAttributes(data.attributes)
-      setSkills(data.skills)
-      setAvailableSkillPoints(data.availableSkillPoints)
-      setLoading(false)
+      const data = getResponse.data.body;
+      setCharacters(data);
+      setLoading(false);
     }
-  }
+  };
+
+  const addNewCharacter = () => {
+    const newChar = {
+      attributes: {
+        Strength: {
+          value: 9,
+          modifier: -1,
+        },
+        Dexterity: {
+          value: 9,
+          modifier: -1,
+        },
+        Constitution: {
+          value: 9,
+          modifier: -1,
+        },
+        Intelligence: {
+          value: 9,
+          modifier: -1,
+        },
+        Wisdom: {
+          value: 9,
+          modifier: -1,
+        },
+        Charisma: {
+          value: 9,
+          modifier: -1,
+        },
+      },
+      skills: {},
+      availableSkillPoints: 10 + (4 * -1),
+      id: characters.length,
+    };
+    setCharacters([...characters, newChar])
+  };
 
   return (
     <div className='App'>
       <header className='App-header'>
         <h1>React Coding Exercise</h1>
       </header>
-      {!loading && (
-        <section className='App-section'>
-          <div>
-            <h3>Attributes</h3>
-            {Object.entries(attributes).map(attribute => (
-              <div key={attribute[0]}>
-                {attribute[0]}:{attribute[1]?.value} (modifier:{' '}
-                {attribute[1]?.modifier})
-                <button onClick={() => modifyAttribute(attribute[0], 1)}>
-                  +
-                </button>
-                <button onClick={() => modifyAttribute(attribute[0], -1)}>
-                  -
-                </button>
-              </div>
-            ))}
-          </div>
-          <div>
-            <h3>Classes</h3>
-            {Object.entries(CLASS_LIST).map(charClass => (
-              <Class
-                key={charClass[0]}
-                className={charClass[0]}
-                classRequirements={charClass[1]}
-                charAttributes={attributes}
-              />
-            ))}
-          </div>
-          <div>
-            <h3>Skills</h3>
-            <p>Skill Points Available: {availableSkillPoints}</p>
-            {SKILL_LIST.map(skill => (
-              <Skill
-                key={skill.name}
-                skill={skill}
-                charParams={{
-                  points: charSkills[skill.name]?.points || 0,
-                  modifierValue: attributes[skill.attributeModifier]?.modifier,
-                  total: charSkills[skill.name]?.total != null
-                    ? charSkills[skill.name].total
-                    : attributes[skill.attributeModifier]?.modifier
-                }}
-                modifySkillPoints={modifySkillPoints}
-              />
-            ))}
-          </div>
-          <button onClick={postCharacterSheet}>Submit</button>
-        </section>
-      )}
+      <section className='App-section'>
+        <button onClick={addNewCharacter}>Add new character</button>
+        {!loading &&
+          characters.map((char, idx) => (
+            <Character
+              key={idx}
+              id={char.id}
+              attr={char.attributes}
+              skills={char.skills}
+              skillPoints={char.availableSkillPoints}
+              modifyAttribute={modifyCharacterAttribute}
+              modifySkillPoints={modifyCharacterSkillPoints}
+            />
+          ))}
+        <button onClick={postCharacterSheets}>Submit</button>
+      </section>
     </div>
   );
 }
